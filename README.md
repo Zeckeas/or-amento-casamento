@@ -1,212 +1,128 @@
-# Wedding Budget Planner
+# Wedding Planner Application
 
-Um aplicativo web moderno para gerenciar o orçamento e planejamento do seu casamento de forma eficiente e organizada.
+Uma aplicação web moderna para planejamento de casamentos, desenvolvida com React, TypeScript e Supabase.
 
-[previous content remains the same until the Database section]
+## 🌟 Funcionalidades
 
-## 💾 Configuração do Banco de Dados (Supabase)
+- 💰 **Gestão de Orçamento**
+  - Acompanhamento de gastos em tempo real
+  - Visualização gráfica do orçamento
+  - Categorização de despesas
 
-### Estrutura do Banco de Dados
+- 👥 **Gestão de Fornecedores**
+  - Cadastro e acompanhamento de fornecedores
+  - Status de pagamentos
+  - Comparação de preços
 
-Execute os seguintes comandos SQL no Editor SQL do Supabase para criar todas as tabelas necessárias:
+- 📅 **Cronograma**
+  - Calendário de eventos
+  - Lembretes importantes
+  - Organização de compromissos
 
-```sql
--- Habilitar a extensão UUID
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+- 🖼️ **Galeria de Inspirações**
+  - Upload de imagens
+  - Organização por categorias
+  - Compartilhamento de ideias
 
--- Tabela de Usuários (extends Supabase auth.users)
-CREATE TABLE public.profiles (
-    id UUID REFERENCES auth.users PRIMARY KEY,
-    wedding_date DATE,
-    total_budget DECIMAL(10,2),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
+## 🚀 Tecnologias
 
--- Trigger para atualizar updated_at
-CREATE TRIGGER set_updated_at
-    BEFORE UPDATE ON public.profiles
-    FOR EACH ROW
-    EXECUTE FUNCTION public.set_updated_at();
+- [React](https://reactjs.org/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Vite](https://vitejs.dev/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Supabase](https://supabase.com/)
+- [React Query](https://tanstack.com/query)
+- [Chart.js](https://www.chartjs.org/)
+- [Lucide Icons](https://lucide.dev/)
 
--- Tabela de Categorias de Orçamento
-CREATE TABLE public.budget_categories (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    description TEXT,
-    color VARCHAR(7),
-    icon VARCHAR(50),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
+## 📋 Pré-requisitos
 
--- Tabela de Fornecedores
-CREATE TABLE public.vendors (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    category_id UUID REFERENCES public.budget_categories(id),
-    contact_name VARCHAR(255),
-    phone VARCHAR(20),
-    email VARCHAR(255),
-    website VARCHAR(255),
-    notes TEXT,
-    rating SMALLINT CHECK (rating >= 1 AND rating <= 5),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
+- Node.js (versão 18 ou superior)
+- npm ou yarn
+- Conta no Supabase
 
--- Tabela de Orçamentos
-CREATE TABLE public.budget_items (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    profile_id UUID REFERENCES public.profiles(id),
-    category_id UUID REFERENCES public.budget_categories(id),
-    vendor_id UUID REFERENCES public.vendors(id),
-    name VARCHAR(255) NOT NULL,
-    description TEXT,
-    estimated_amount DECIMAL(10,2),
-    actual_amount DECIMAL(10,2),
-    due_date DATE,
-    status VARCHAR(20) CHECK (status IN ('pending', 'paid', 'partial', 'cancelled')),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
+## 🛠️ Instalação
 
--- Tabela de Pagamentos
-CREATE TABLE public.payments (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    budget_item_id UUID REFERENCES public.budget_items(id),
-    amount DECIMAL(10,2) NOT NULL,
-    payment_date DATE NOT NULL,
-    payment_method VARCHAR(50),
-    notes TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- Tabela de Eventos/Compromissos
-CREATE TABLE public.events (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    profile_id UUID REFERENCES public.profiles(id),
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-    event_date TIMESTAMP WITH TIME ZONE NOT NULL,
-    location VARCHAR(255),
-    type VARCHAR(50) CHECK (type IN ('meeting', 'payment', 'appointment', 'other')),
-    status VARCHAR(20) CHECK (status IN ('pending', 'completed', 'cancelled')),
-    vendor_id UUID REFERENCES public.vendors(id),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- Tabela de Galeria de Inspiração
-CREATE TABLE public.inspiration_gallery (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    profile_id UUID REFERENCES public.profiles(id),
-    category_id UUID REFERENCES public.budget_categories(id),
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-    image_url TEXT NOT NULL,
-    tags TEXT[],
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- Tabela de Notas e Comentários
-CREATE TABLE public.notes (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    profile_id UUID REFERENCES public.profiles(id),
-    related_to UUID,
-    related_type VARCHAR(50) CHECK (related_type IN ('vendor', 'budget_item', 'event', 'inspiration')),
-    content TEXT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- Políticas de Segurança RLS (Row Level Security)
-
--- Habilitar RLS para todas as tabelas
-ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.budget_categories ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.vendors ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.budget_items ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.inspiration_gallery ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.notes ENABLE ROW LEVEL SECURITY;
-
--- Política para profiles
-CREATE POLICY "Users can view own profile"
-    ON public.profiles FOR SELECT
-    USING (auth.uid() = id);
-
-CREATE POLICY "Users can update own profile"
-    ON public.profiles FOR UPDATE
-    USING (auth.uid() = id);
-
--- Política para budget_items
-CREATE POLICY "Users can CRUD own budget items"
-    ON public.budget_items FOR ALL
-    USING (auth.uid() = profile_id);
-
--- Política para events
-CREATE POLICY "Users can CRUD own events"
-    ON public.events FOR ALL
-    USING (auth.uid() = profile_id);
-
--- Política para inspiration_gallery
-CREATE POLICY "Users can CRUD own inspiration items"
-    ON public.inspiration_gallery FOR ALL
-    USING (auth.uid() = profile_id);
-
--- Política para notes
-CREATE POLICY "Users can CRUD own notes"
-    ON public.notes FOR ALL
-    USING (auth.uid() = profile_id);
-
--- Índices para melhor performance
-CREATE INDEX idx_budget_items_profile ON public.budget_items(profile_id);
-CREATE INDEX idx_events_profile ON public.events(profile_id);
-CREATE INDEX idx_inspiration_profile ON public.inspiration_gallery(profile_id);
-CREATE INDEX idx_notes_profile ON public.notes(profile_id);
-CREATE INDEX idx_budget_items_category ON public.budget_items(category_id);
-CREATE INDEX idx_vendors_category ON public.vendors(category_id);
+1. Clone o repositório:
+```bash
+git clone [url-do-repositorio]
+cd wedding-planner
 ```
 
-### Funções Auxiliares
-
-```sql
--- Função para atualizar o timestamp de updated_at
-CREATE OR REPLACE FUNCTION public.set_updated_at()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = timezone('utc'::text, now());
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Função para calcular o total gasto
-CREATE OR REPLACE FUNCTION public.calculate_total_spent(profile_uuid UUID)
-RETURNS DECIMAL AS $$
-BEGIN
-    RETURN COALESCE(
-        (SELECT SUM(actual_amount)
-         FROM public.budget_items
-         WHERE profile_id = profile_uuid
-         AND status = 'paid'),
-        0
-    );
-END;
-$$ LANGUAGE plpgsql;
+2. Instale as dependências:
+```bash
+npm install
 ```
 
-### Dados Iniciais (Seed)
-
-```sql
--- Inserir categorias padrão
-INSERT INTO public.budget_categories (name, description, color, icon) VALUES
-    ('Vestido e Traje', 'Vestido de noiva, traje do noivo e acessórios', '#8b5cf6', 'dress'),
-    ('Local e Decoração', 'Local da cerimônia e recepção, decoração', '#ec4899', 'building'),
-    ('Buffet e Bebidas', 'Comida, bebidas e bolo', '#14b8a6', 'utensils'),
-    ('Música', 'Banda, DJ e entretenimento', '#f59e0b', 'music'),
-    ('Fotografia', 'Fotografia e filmagem', '#6366f1', 'camera');
+3. Configure as variáveis de ambiente:
+   - Crie um arquivo `.env.local` na raiz do projeto
+   - Adicione suas credenciais do Supabase:
+```env
+VITE_SUPABASE_URL=sua-url-do-supabase
+VITE_SUPABASE_ANON_KEY=sua-chave-anonima-do-supabase
 ```
 
-[rest of the previous content remains the same]
+## 🚀 Executando o Projeto
+
+1. Inicie o servidor de desenvolvimento:
+```bash
+npm run dev
+```
+
+2. Acesse a aplicação:
+   - Abra seu navegador
+   - Acesse `http://localhost:5173`
+
+## 📦 Build para Produção
+
+Para gerar a versão de produção:
+
+```bash
+npm run build
+```
+
+Os arquivos serão gerados na pasta `dist`.
+
+## 🗄️ Estrutura do Projeto
+
+```
+wedding-planner/
+├── src/
+│   ├── components/
+│   │   ├── Budget/
+│   │   │   ├── BudgetChart.tsx
+│   │   │   └── BudgetSection.tsx
+│   │   └── Header.tsx
+│   ├── lib/
+│   │   └── supabase.ts
+│   ├── App.tsx
+│   └── main.tsx
+├── public/
+├── .env.local
+└── package.json
+```
+
+## 🔧 Configuração do Supabase
+
+1. Crie uma conta no [Supabase](https://supabase.com)
+2. Crie um novo projeto
+3. Copie as credenciais (URL e Anon Key)
+4. Configure as variáveis de ambiente conforme descrito acima
+
+## 🤝 Contribuindo
+
+1. Faça um fork do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+## 📝 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+## 📧 Contato
+
+Seu Nome - [seu-email@exemplo.com]
+
+Link do Projeto: [https://github.com/seu-usuario/wedding-planner](https://github.com/seu-usuario/wedding-planner)

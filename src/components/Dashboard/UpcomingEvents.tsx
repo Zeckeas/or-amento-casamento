@@ -18,12 +18,12 @@ export function UpcomingEvents({ events }: UpcomingEventsProps) {
     <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-gray-800">Próximos Compromissos</h2>
-        <Calendar className="h-5 w-5 text-gray-400" />
+        <Calendar className="h-6 w-6 text-gray-400" />
       </div>
-      
+
       <div className="space-y-4">
         {events.map((event) => (
-          <div key={event.id} className="flex items-start space-x-4 p-4 rounded-lg bg-gray-50">
+          <div key={event.id} className="flex items-start space-x-4 p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition duration-200">
             <div className="flex-shrink-0">
               <Clock className="h-5 w-5 text-gray-400" />
             </div>
@@ -32,7 +32,7 @@ export function UpcomingEvents({ events }: UpcomingEventsProps) {
               <p className="text-sm text-gray-500">{new Date(event.date).toLocaleDateString('pt-BR')}</p>
             </div>
             {event.amount && (
-              <div className="inline-flex px-2 py-1 text-sm font-medium text-emerald-700 bg-emerald-100 rounded-full">
+              <div className="inline-flex items-center px-2 py-1 text-sm font-medium text-emerald-700 bg-emerald-100 rounded-full">
                 {event.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
               </div>
             )}

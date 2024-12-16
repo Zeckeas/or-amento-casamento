@@ -1,18 +1,29 @@
 import React from 'react';
-import { Header } from './components/Header';
-import { BudgetSection } from './components/Budget/BudgetSection';
-import { Toaster } from 'react-hot-toast';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Dashboard } from './pages/Dashboard';
+import { Budget } from './pages/Budget';
+import { Inspiration } from './pages/Inspiration';
+import { Timeline } from './pages/Timeline';
+import { Suppliers } from './pages/Suppliers';
+import { Settings } from './pages/Settings';
+import { Sidebar } from './components/layout/Sidebar';
 
-function App() {
+export const App: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Toaster position="top-right" />
-      <Header />
-      <main className="pt-16">
-        <BudgetSection />
-      </main>
-    </div>
+    <Router>
+      <div className="flex min-h-screen bg-gray-50">
+        <Sidebar />
+        <main className="flex-1 p-8 overflow-y-auto">
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/budget" element={<Budget />} />
+            <Route path="/inspiration" element={<Inspiration />} />
+            <Route path="/suppliers" element={<Suppliers />} />
+            <Route path="/timeline" element={<Timeline />} />
+            <Route path="/settings" element={<Settings />} />
+          </Routes>
+        </main>
+      </div>
+    </Router>
   );
-}
-
-export default App;
+};

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SettingsForm } from '../components/settings/SettingsForm';
 import { ProfileForm } from '../components/settings/ProfileForm';
 import { DocumentUpload } from '../components/documents/DocumentUpload';
@@ -10,13 +10,32 @@ import { supabase } from '../config/supabase';
 import { CustomDocument, ExportOptions } from '../types/document'; // Renomeado para CustomDocument
 import { exportToPDF, exportToExcel } from '../utils/export';
 import { useBudgetStore } from '../store/budgetStore';
-import { useSupplierStore } from '../store/supplierStore'; 
+import { useSupplierStore } from '../store/supplierStore';
+import { useNavigate } from 'react-router-dom'; // Alteração aqui
 
 export const Settings: React.FC = () => {
   const [documents, setDocuments] = useState<CustomDocument[]>([]); // Usando CustomDocument
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const { categories } = useBudgetStore();
   const { suppliers } = useSupplierStore();
+  const [user, setUser] = useState<any>(null);
+  const navigate = useNavigate(); // Alteração aqui
+
+  // Verifica o estado de autenticação ao carregar o componente
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: userData, error } = await supabase.auth.getUser();
+      if (error || !userData) {
+        console.log('Usuário não autenticado!');
+        alert('Você precisa estar logado para acessar as configurações!');
+        navigate('/login'); // Alteração aqui para redirecionar
+      } else {
+        setUser(userData); // Usuário autenticado
+      }
+    };
+
+    checkUser();
+  }, [navigate]); // Alteração aqui para incluir o 'navigate' na lista de dependências
 
   const handleFileUpload = async (file: File) => {
     try {
@@ -46,7 +65,6 @@ export const Settings: React.FC = () => {
       setDocuments([...documents, newDocument]);
     } catch (error) {
       console.error('Error uploading file:', error);
-      // Add error handling UI feedback here
     }
   };
 
@@ -55,7 +73,7 @@ export const Settings: React.FC = () => {
       const response = await fetch(document.url);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a'); // Isso é correto
+      const a = document.createElement('a');
       a.href = url;
       a.download = document.name;
       document.body.appendChild(a);
@@ -66,7 +84,7 @@ export const Settings: React.FC = () => {
       console.error('Error downloading document:', error);
     }
   };
-  
+
   const handleDocumentDelete = async (id: string) => {
     try {
       const document = documents.find(doc => doc.id === id);
@@ -84,7 +102,6 @@ export const Settings: React.FC = () => {
       setDocuments(documents.filter(doc => doc.id !== id));
     } catch (error) {
       console.error('Error deleting document:', error);
-      // Add error handling UI feedback here
     }
   };
 
@@ -92,7 +109,6 @@ export const Settings: React.FC = () => {
     const data = {
       categories,
       suppliers,
-      // Add other data as needed
     };
 
     if (options.format === 'pdf') {
@@ -101,6 +117,10 @@ export const Settings: React.FC = () => {
       exportToExcel(options.type, data);
     }
   };
+
+  if (!user) {
+    return <div>Carregando...</div>; // Enquanto espera o usuário, exibe um carregamento
+  }
 
   return (
     <div className="space-y-8">

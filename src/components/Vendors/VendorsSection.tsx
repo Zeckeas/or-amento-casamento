@@ -3,7 +3,7 @@ import { VendorsList } from './VendorsList';
 import { VendorForm } from './VendorForm';
 import { Vendor } from '../../types/vendors';
 import { PlusCircle } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../config/supabase';
 
 export function VendorsSection() {
   const [vendors, setVendors] = useState<Vendor[]>([]);

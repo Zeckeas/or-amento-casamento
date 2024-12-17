@@ -1,9 +1,9 @@
 import React from 'react';
-import { Category } from '../../types/budget';
+import { BudgetCategory } from '../../types/budget'; // Corrigido para importar BudgetCategory
 import { getStatusColor } from '../../utils/statusColors';
 
 type CategoryItemProps = {
-  category: Category;
+  category: BudgetCategory; // Alterado para BudgetCategory
 };
 
 export function CategoryItem({ category }: CategoryItemProps) {
@@ -17,7 +17,6 @@ export function CategoryItem({ category }: CategoryItemProps) {
           <p className="text-sm text-gray-500">{category.vendor}</p>
         </div>
         <div className="text-right">
-          
           <span
             className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor}`}
           >

@@ -4,9 +4,11 @@ export const validateEmail = (email: string): boolean => {
 };
 
 export const validatePhone = (phone: string): boolean => {
-  const phoneRegex = /^\(\d{2}\)\s\d{5}-\d{4}$/;
-  return phoneRegex.test(phone);
+  const cleanedPhone = phone.replace(/\D/g, '');
+  const phoneRegex = /^\d{11}$/;
+  return phoneRegex.test(cleanedPhone);
 };
+
 
 export const validateRequired = (value: string): boolean => {
   return value.trim().length > 0;

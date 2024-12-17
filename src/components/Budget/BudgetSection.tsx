@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { BudgetChart } from './BudgetChart';
 import { BudgetTotal } from './BudgetTotal';
 import { CategoryList } from './CategoryList';
-import { Category } from '../../types/budget';
+import { BudgetCategory } from '../../types/budget'; // Certifique-se de usar BudgetCategory
 import { calculateTotalSpent } from '../../utils/budgetCalculations';
 
 export function BudgetSection() {
   const [totalBudget, setTotalBudget] = useState(50000);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<BudgetCategory[]>([]); // Ajustado para BudgetCategory
   const [newCategory, setNewCategory] = useState<{ name: string; value: number; status: string }>({
     name: '',
     value: 0,
@@ -18,8 +18,18 @@ export function BudgetSection() {
 
   const handleAddCategory = () => {
     if (newCategory.name && newCategory.value > 0) {
-      setCategories([...categories, { ...newCategory }]);
-      setNewCategory({ name: '', value: 0, status: 'Pendente' }); // Reset form after adding
+      const newCategoryItem: BudgetCategory = {
+        id: crypto.randomUUID(),
+        name: newCategory.name,
+        value: newCategory.value,
+        status: newCategory.status,
+        planned: newCategory.value, // Supondo que o valor da categoria é o "planned" (planejado)
+        spent: 0, // Inicialmente o valor gasto é zero
+        items: [], // Inicializando a lista de itens como um array vazio
+      };
+
+      setCategories([...categories, newCategoryItem]);
+      setNewCategory({ name: '', value: 0, status: 'Pendente' }); // Resetando o formulário após adicionar
     }
   };
 

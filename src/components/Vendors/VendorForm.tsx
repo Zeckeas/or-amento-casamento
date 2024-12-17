@@ -1,7 +1,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import { Vendor } from '../../types/vendors';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../config/supabase';
 
 type VendorFormProps = {
   onSubmit: (vendor: Omit<Vendor, 'id'>) => void;

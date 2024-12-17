@@ -7,13 +7,13 @@ import { ExportModal } from '../components/export/ExportModal';
 import { Button } from '../components/ui/Button';
 import { Download, Upload } from 'lucide-react';
 import { supabase } from '../config/supabase';
-import { Document, ExportOptions } from '../types/document';
+import { CustomDocument, ExportOptions } from '../types/document'; // Renomeado para CustomDocument
 import { exportToPDF, exportToExcel } from '../utils/export';
 import { useBudgetStore } from '../store/budgetStore';
-import { useSupplierStore } from '../store/supplierStore';
+import { useSupplierStore } from '../store/supplierStore'; 
 
 export const Settings: React.FC = () => {
-  const [documents, setDocuments] = useState<Document[]>([]);
+  const [documents, setDocuments] = useState<CustomDocument[]>([]); // Usando CustomDocument
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const { categories } = useBudgetStore();
   const { suppliers } = useSupplierStore();
@@ -34,7 +34,7 @@ export const Settings: React.FC = () => {
         .from('documents')
         .getPublicUrl(filePath);
 
-      const newDocument: Document = {
+      const newDocument: CustomDocument = { // Usando CustomDocument
         id: crypto.randomUUID(),
         name: file.name,
         type: 'contract',
@@ -50,12 +50,12 @@ export const Settings: React.FC = () => {
     }
   };
 
-  const handleDocumentDownload = async (document: Document) => {
+  const handleDocumentDownload = async (document: CustomDocument) => {
     try {
       const response = await fetch(document.url);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement('a'); // Isso é correto
       a.href = url;
       a.download = document.name;
       document.body.appendChild(a);
@@ -64,10 +64,9 @@ export const Settings: React.FC = () => {
       document.body.removeChild(a);
     } catch (error) {
       console.error('Error downloading document:', error);
-      // Add error handling UI feedback here
     }
   };
-
+  
   const handleDocumentDelete = async (id: string) => {
     try {
       const document = documents.find(doc => doc.id === id);

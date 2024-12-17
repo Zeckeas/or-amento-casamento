@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { useBudgetStore } from '../store/budgetStore';
 import { BudgetCategory, BudgetItem } from '../types/budget';
-import { BudgetCategoryCard } from '../components/budget/BudgetCategoryCard';
-import { BudgetItemList } from '../components/budget/BudgetItemList';
-import { AddCategoryModal } from '../components/budget/AddCategoryModal';
+import { BudgetCategoryCard } from '../components/Budget/BudgetCategoryCard';
+import { BudgetItemList } from '../components/Budget/BudgetItemList';
+import { AddCategoryModal } from '../components/Budget/AddCategoryModal';
 import { Button } from '../components/ui/Button';
 
 export const Budget: React.FC = () => {

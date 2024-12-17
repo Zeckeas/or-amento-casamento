@@ -4,6 +4,8 @@ export interface BudgetCategory {
   planned: number;
   spent: number;
   items: BudgetItem[];
+  value: number; 
+  status: string;
 }
 
 export interface BudgetItem {

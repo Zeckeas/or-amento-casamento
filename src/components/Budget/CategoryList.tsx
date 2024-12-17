@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { CategoryItem } from './CategoryItem';
 import { PlusCircle } from 'lucide-react';
-import { Category } from '../../types/budget';
-import { supabase } from '../../lib/supabase';
-
+import { BudgetCategory } from '../../types/budget';
+import { supabase } from '../../config/supabase';
+import { CategoryForm } from './CategoryForm'; // Certifique-se de importar o CategoryForm
 
 export function CategoryList() {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<BudgetCategory[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +22,7 @@ export function CategoryList() {
       setError('Erro ao carregar categorias');
       console.error('Erro ao carregar categorias:', error.message);
     } else {
-      setCategories(data || []);
+      setCategories(data || []); // Se 'data' for nulo, usa um array vazio
     }
   };
 
@@ -31,7 +31,7 @@ export function CategoryList() {
   }, []);
 
   // Adicionar nova categoria
-  const handleAddCategory = async (category: Omit<Category, 'id'>) => {
+  const handleAddCategory = async (category: Omit<BudgetCategory, 'id'>) => {
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
@@ -40,7 +40,9 @@ export function CategoryList() {
         name: category.name,
         description: category.description,
         amount: category.amount,
-      }]);
+        status: category.status, // Certifique-se de incluir o status na inserção
+      }])
+      .single(); // Use .single() para garantir que apenas um item seja retornado
 
     setLoading(false);
 
@@ -49,8 +51,8 @@ export function CategoryList() {
       console.error('Erro ao adicionar categoria:', error.message);
     } else {
       // Atualiza o estado de categorias sem a necessidade de uma nova consulta
-      setCategories((prevCategories) => [...prevCategories, data[0]]);
-      setShowForm(false);
+      setCategories((prevCategories) => [...prevCategories, data]);
+      setShowForm(false); // Fecha o formulário após adicionar a categoria
     }
   };
 

@@ -1,4 +1,4 @@
-export interface Document {
+export interface CustomDocument {
   id: string;
   name: string;
   type: 'contract' | 'invoice' | 'agreement' | 'other';
